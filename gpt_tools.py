@@ -3,6 +3,14 @@ import torch.nn as nn
 import torch.utils.data as data
 import tiktoken
 
+# Models
+model_configs = {
+    "gpt2-small (124M)": {"emb_dim": 768, "n_layers": 12, "n_heads": 12},
+    "gpt2-medium (355M)": {"emb_dim": 1024, "n_layers": 24, "n_heads": 16},
+    "gpt2-large (774M)": {"emb_dim": 1280, "n_layers": 36, "n_heads": 20},
+    "gpt2-xl (1558M)": {"emb_dim": 1600, "n_layers": 48, "n_heads": 25},
+}
+
 # Hyperparametres of model
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
@@ -13,6 +21,9 @@ GPT_CONFIG_124M = {
     "drop_rate": 0.1,
     "qkv_bias": False
 }
+
+# tokenizer
+tokenizer = tiktoken.get_encoding("gpt2")
 
 # Helper functions
 def generate_text_simple(model, idx, max_new_tokens, context_size):
@@ -51,6 +62,12 @@ def text_to_token_ids(text, tokenizer):
 def token_ids_to_text(token_ids, tokenizer):
     flat = token_ids.squeeze(0) # remove batch dimension
     return tokenizer.decode(flat.tolist())
+
+# Checks that array dimensions are same
+def assign(left, right):
+    if left.shape != right.shape:
+        raise ValueError(f"Shape mismatch. Left: {left.shape}, Right: {right.shape}")
+    return torch.nn.Parameter(torch.tensor(right))
 
 # Batch loss
 def calc_loss_batch(input_batch, target_batch, model, device):
